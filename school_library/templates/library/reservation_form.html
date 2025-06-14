@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Бронирование книги{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Бронирование книги</h4>
+            </div>
+            <div class="card-body">
+                {% if book %}
+                    <div class="mb-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="img-fluid" style="max-height: 150px;">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>{{ book.title }}</h5>
+                                <p class="text-muted">{{ book.author.name }}</p>
+                                <div>
+                                    <span class="badge bg-info">{{ book.subject.name }}</span>
+                                    <span class="badge bg-secondary">{{ book.grade }} класс</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="{{ form.book_copy.id_for_label }}" class="form-label">Экземпляр книги</label>
+                        {{ form.book_copy }}
+                        {% if form.book_copy.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.book_copy.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="{{ form.due_date.id_for_label }}" class="form-label">{{ form.due_date.label }}</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.due_date.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0">Срок бронирования не должен превышать 14 дней.</p>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'book-detail' view.kwargs.pk %}" class="btn btn-outline-secondary">Отмена</a>
+                        <button type="submit" class="btn btn-primary">Забронировать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formControls = document.querySelectorAll('input, select');
+        formControls.forEach(element => {
+            // Добавляем класс, если его еще нет
+            if (!element.classList.contains('form-control')) {
+                element.classList.add('form-control');
+            }
+        });
+        
+        // Установка минимальной даты - сегодня
+        const today = new Date();
+        const dateField = document.getElementById('id_due_date');
+        
+        // Форматирование даты YYYY-MM-DD
+        const todayFormatted = today.toISOString().split('T')[0];
+        dateField.setAttribute('min', todayFormatted);
+        
+        // Установка максимальной даты - сегодня + 14 дней
+        const maxDate = new Date();
+        maxDate.setDate(today.getDate() + 14);
+        const maxDateFormatted = maxDate.toISOString().split('T')[0];
+        dateField.setAttribute('max', maxDateFormatted);
+        
+        // Установка даты по умолчанию - через 7 дней
+        const defaultDate = new Date();
+        defaultDate.setDate(today.getDate() + 7);
+        const defaultDateFormatted = defaultDate.toISOString().split('T')[0];
+        dateField.value = defaultDateFormatted;
+    });
+</script>
+{% endblock %} 

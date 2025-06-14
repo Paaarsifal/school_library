@@ -1,0 +1,65 @@
+<div class="row">
+    {% for book in object_list %}
+        <div class="col-md-4 mb-4">
+            <div class="book-card">
+                <a href="{% url 'book-detail' book.id %}" class="d-block text-center">
+                    <div class="book-cover-container" style="width: 150px; height: 200px; margin: 0 auto; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 5px; overflow: hidden;">
+                        <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </a>
+                <h5 class="mt-3 text-center"><a href="{% url 'book-detail' book.id %}" class="text-decoration-none">{{ book.title }}</a></h5>
+                <p class="text-muted text-center">{{ book.author.name }}</p>
+                <p class="text-center">
+                    <span class="badge bg-info">{{ book.subject.name }}</span>
+                    <span class="badge bg-secondary">{{ book.grade }} класс</span>
+                </p>
+                <div class="mt-3 text-center">
+                    <a href="{% url 'book-detail' book.id %}" class="btn btn-sm btn-primary">Подробнее</a>
+                    {% if book.excerpt %}
+                        <a href="{% url 'view-excerpt' book.id %}" class="btn btn-sm btn-outline-secondary">Читать отрывок</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center">
+            <p>Книги не найдены. Попробуйте изменить параметры поиска.</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+    <nav aria-label="Pagination">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-get="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-target="#books-list">&laquo; Первая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-get="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-target="#books-list">Предыдущая</a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <a class="page-link" href="#">{{ num }}</a>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-get="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-target="#books-list">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-get="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-target="#books-list">Следующая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-get="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" hx-target="#books-list">Последняя &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %} 

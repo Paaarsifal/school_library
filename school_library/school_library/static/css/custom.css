@@ -1,0 +1,122 @@
+/* Основные стили для школьной библиотеки */
+
+/* Общие стили */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Заголовки */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+    color: #343a40;
+}
+
+/* Навигация */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: #007bff !important;
+}
+
+/* Карточки книг */
+.book-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-cover {
+    max-height: 200px;
+    object-fit: contain;
+}
+
+/* Кнопки */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Формы */
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Детали книги */
+.book-details img {
+    max-height: 300px;
+    object-fit: contain;
+}
+
+/* Фильтры */
+.filter-section {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Подвал */
+footer {
+    background-color: #343a40;
+    color: #f8f9fa;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+/* Сообщения */
+.alert {
+    border-radius: 3px;
+    border-left-width: 4px;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .book-filter {
+        margin-bottom: 15px;
+    }
+} 

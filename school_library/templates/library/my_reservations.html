@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои бронирования{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Мои бронирования</h2>
+        <hr>
+        
+        {% if object_list %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Книга</th>
+                            <th>Инвентарный номер</th>
+                            <th>Дата бронирования</th>
+                            <th>Срок возврата</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in object_list %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'book-detail' reservation.book_copy.book.id %}">
+                                        {{ reservation.book_copy.book.title }}
+                                    </a>
+                                    <div class="text-muted small">{{ reservation.book_copy.book.author.name }}</div>
+                                </td>
+                                <td>{{ reservation.book_copy.inventory_number }}</td>
+                                <td>{{ reservation.reserved_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ reservation.due_date|date:"d.m.Y" }}</td>
+                                <td>
+                                    {% if reservation.status == 'returned' %}
+                                        <span class="badge bg-success">Возвращена {{ reservation.returned_at|date:"d.m.Y" }}</span>
+                                    {% elif reservation.status == 'rejected' %}
+                                        <span class="badge bg-danger">Отклонена</span>
+                                    {% elif reservation.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">На рассмотрении</span>
+                                    {% elif reservation.status == 'approved' %}
+                                        {% if reservation.due_date < today %}
+                                            <span class="badge bg-danger">Просрочена!</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Активна</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p>У вас нет активных бронирований.</p>
+                <a href="{% url 'book-list' %}" class="btn btn-primary mt-2">Перейти к каталогу книг</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

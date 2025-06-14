@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Школьная библиотека - Главная{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Электронная школьная библиотека</h1>
+            <p class="lead">Добро пожаловать в электронную библиотеку нашей школы. Здесь вы можете найти учебники, пособия и художественную литературу.</p>
+            <hr class="my-4">
+            <p>Для поиска книг воспользуйтесь каталогом. Бронирование доступно только авторизованным пользователям.</p>
+            <a class="btn btn-primary btn-lg" href="{% url 'book-list' %}" role="button">Перейти к каталогу</a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <h2>Новые поступления</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    {% for book in latest_books %}
+        <div class="col-md-2 mb-4">
+            <div class="book-card">
+                <a href="{% url 'book-detail' book.id %}" class="d-block text-center">
+                    <div class="book-cover-container" style="width: 120px; height: 160px; margin: 0 auto; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 5px; overflow: hidden;">
+                        <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </a>
+                <h5 class="mt-3 text-center"><a href="{% url 'book-detail' book.id %}" class="text-decoration-none">{{ book.title }}</a></h5>
+                <p class="text-muted text-center">{{ book.author.name }}</p>
+                <p class="text-center"><span class="badge bg-info">{{ book.subject.name }}</span> <span class="badge bg-secondary">{{ book.grade }} класс</span></p>
+                <div class="mt-3 text-center">
+                    <a href="{% url 'book-detail' book.id %}" class="btn btn-sm btn-primary">Подробнее</a>
+                    {% if book.excerpt %}
+                        <a href="{% url 'view-excerpt' book.id %}" class="btn btn-sm btn-outline-secondary">Читать отрывок</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <p class="text-center">Пока нет добавленных книг</p>
+        </div>
+    {% endfor %}
+</div>
+
+{% for subject, books in books_by_subject.items %}
+    {% if books %}
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h2>{{ subject.name }}</h2>
+                <hr>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for book in books %}
+                <div class="col-md-3 mb-4">
+                    <div class="book-card">
+                        <a href="{% url 'book-detail' book.id %}" class="d-block text-center">
+                            <div class="book-cover-container" style="width: 150px; height: 200px; margin: 0 auto; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 5px; overflow: hidden;">
+                                <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+
+                        </a>
+                        <h5 class="mt-3 text-center"><a href="{% url 'book-detail' book.id %}" class="text-decoration-none">{{ book.title }}</a></h5>
+                        <p class="text-muted text-center">{{ book.author.name }}</p>
+                        <p class="text-center"><span class="badge bg-secondary">{{ book.grade }} класс</span></p>
+                        <div class="mt-3 text-center">
+                            <a href="{% url 'book-detail' book.id %}" class="btn btn-sm btn-primary">Подробнее</a>
+                            {% if book.excerpt %}
+                                <a href="{% url 'view-excerpt' book.id %}" class="btn btn-sm btn-outline-secondary">Читать отрывок</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endfor %}
+{% endblock %} 

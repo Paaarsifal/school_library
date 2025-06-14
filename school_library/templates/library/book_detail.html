@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ object.title }} - Детали книги{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="text-center mb-4">
+            <div class="book-cover-container" style="width: 220px; height: 300px; margin: 0 auto; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 5px; overflow: hidden;">
+                <img src="{{ object.cover.url }}" alt="{{ object.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h5>Информация о книге</h5>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Предмет
+                    <span class="badge bg-primary rounded-pill">{{ object.subject.name }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Класс
+                    <span class="badge bg-secondary rounded-pill">{{ object.grade }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Добавлена
+                    <span>{{ object.created_at|date:"d.m.Y" }}</span>
+                </li>
+                {% if user.user_type == 'librarian' %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Всего экземпляров
+                        <span class="badge bg-info rounded-pill">{{ all_copies|length }}</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class="mt-4">
+            {% if object.excerpt %}
+                <a href="{% url 'view-excerpt' object.id %}" class="btn btn-outline-primary w-100 mb-2">Читать отрывок</a>
+            {% endif %}
+            {% if user.is_authenticated and object.book_file %}
+                <a href="{% url 'download-book' object.id %}" class="btn btn-outline-success w-100 mb-2">Скачать книгу</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <h1>{{ object.title }}</h1>
+        <h5 class="text-muted">{{ object.author.name }}</h5>
+        
+        <hr>
+        
+        {% if has_available_copies and user.is_authenticated and user.user_type != 'librarian' %}
+            <div class="alert alert-success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Книга доступна для бронирования</span>
+                    <a href="{% url 'book-reserve' object.id %}" class="btn btn-success">Забронировать</a>
+                </div>
+            </div>
+        {% elif not has_available_copies and user.is_authenticated and user.user_type != 'librarian' %}
+            <div class="alert alert-warning">
+                К сожалению, сейчас все экземпляры книги заняты.
+            </div>
+        {% endif %}
+        
+        {% if user.user_type == 'librarian' %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Управление книгой</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'book-update' object.id %}" class="btn btn-primary">Редактировать книгу</a>
+                        <a href="{% url 'bookcopy-create' object.id %}" class="btn btn-success">Добавить экземпляр</a>
+                        <a href="{% url 'book-delete' object.id %}" class="btn btn-danger">Удалить книгу</a>
+                    </div>
+                </div>
+            </div>
+            
+            {% if all_copies %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Экземпляры</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Инвентарный номер</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for copy in all_copies %}
+                                    <tr>
+                                        <td>{{ copy.inventory_number }}</td>
+                                        <td>
+                                            {% if copy.is_available %}
+                                                <span class="badge bg-success">Доступен</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Занят</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'bookcopy-update' copy.id %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+            
+            {% if reservations %}
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Текущие бронирования</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Пользователь</th>
+                                    <th>Экземпляр</th>
+                                    <th>Дата бронирования</th>
+                                    <th>Срок возврата</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reservation in reservations %}
+                                    <tr>
+                                        <td>{{ reservation.user.username }}</td>
+                                        <td>{{ reservation.book_copy.inventory_number }}</td>
+                                        <td>{{ reservation.reserved_at|date:"d.m.Y" }}</td>
+                                        <td>{{ reservation.due_date|date:"d.m.Y" }}</td>
+                                        <td>
+                                            <form hx-post="{% url 'return-book' reservation.id %}" hx-swap="outerHTML">
+                                                <button type="submit" class="btn btn-sm btn-success">Возврат</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

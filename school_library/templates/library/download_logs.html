@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Журнал скачиваний файлов{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Журнал скачиваний файлов</h2>
+        <hr>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Фильтры</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{% url 'download-logs' %}">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="file_type" class="form-label">Тип файла</label>
+                            <select name="file_type" id="file_type" class="form-select">
+                                <option value="" {% if not file_type %}selected{% endif %}>Все типы</option>
+                                <option value="book" {% if file_type == 'book' %}selected{% endif %}>Книги</option>
+                                <option value="excerpt" {% if file_type == 'excerpt' %}selected{% endif %}>Отрывки</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="user" class="form-label">Пользователь</label>
+                            <input type="text" class="form-control" id="user" name="user" value="{{ user_search }}" placeholder="Имя пользователя">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="book" class="form-label">Книга/Автор</label>
+                            <input type="text" class="form-control" id="book" name="book" value="{{ book_search }}" placeholder="Название или автор">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">Применить фильтры</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="date_from" class="form-label">Дата с</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="date_to" class="form-label">Дата по</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <a href="{% url 'download-logs' %}" class="btn btn-outline-secondary w-100">Сбросить фильтры</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Журнал скачиваний -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Журнал скачиваний</h5>
+            </div>
+            <div class="card-body">
+                {% if page_obj %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Пользователь</th>
+                                    <th>Роль</th>
+                                    <th>Книга</th>
+                                    <th>Автор</th>
+                                    <th>Тип файла</th>
+                                    <th>Дата и время</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for download in page_obj %}
+                                    <tr>
+                                        <td>{{ download.id }}</td>
+                                        <td>{{ download.user.username }}</td>
+                                        <td>
+                                            {% if download.user.user_type == 'student' %}
+                                                <span class="badge bg-secondary">Ученик {% if download.user.grade %}{{ download.user.grade }} класса{% endif %}</span>
+                                            {% elif download.user.user_type == 'teacher' %}
+                                                <span class="badge bg-info">Учитель</span>
+                                            {% elif download.user.user_type == 'librarian' %}
+                                                <span class="badge bg-warning text-dark">Библиотекарь</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><a href="{% url 'book-detail' download.book.id %}">{{ download.book.title }}</a></td>
+                                        <td>{{ download.book.author.name }}</td>
+                                        <td>
+                                            {% if download.file_type == 'book' %}
+                                                <span class="badge bg-success">Книга</span>
+                                            {% elif download.file_type == 'excerpt' %}
+                                                <span class="badge bg-primary">Отрывок</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ download.downloaded_at|date:"d.m.Y H:i:s" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Пагинация -->
+                    {% if page_obj.has_other_pages %}
+                        <nav aria-label="Страницы" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if file_type %}&file_type={{ file_type }}{% endif %}{% if user_search %}&user={{ user_search }}{% endif %}{% if book_search %}&book={{ book_search }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Первая">
+                                            <span aria-hidden="true">&laquo;&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if file_type %}&file_type={{ file_type }}{% endif %}{% if user_search %}&user={{ user_search }}{% endif %}{% if book_search %}&book={{ book_search }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Предыдущая">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&laquo;&laquo;</span>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&laquo;</span>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }}</span>
+                                        </li>
+                                    {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ i }}{% if file_type %}&file_type={{ file_type }}{% endif %}{% if user_search %}&user={{ user_search }}{% endif %}{% if book_search %}&book={{ book_search }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">{{ i }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if file_type %}&file_type={{ file_type }}{% endif %}{% if user_search %}&user={{ user_search }}{% endif %}{% if book_search %}&book={{ book_search }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Следующая">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if file_type %}&file_type={{ file_type }}{% endif %}{% if user_search %}&user={{ user_search }}{% endif %}{% if book_search %}&book={{ book_search }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Последняя">
+                                            <span aria-hidden="true">&raquo;&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&raquo;</span>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&raquo;&raquo;</span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="alert alert-info">
+                        <p class="mb-0 text-center">Записи о скачиваниях файлов не найдены.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

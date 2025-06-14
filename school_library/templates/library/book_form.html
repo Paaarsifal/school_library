@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Редактирование книги{% else %}Добавление новой книги{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    {% if object %}Редактирование книги "{{ object.title }}"{% else %}Добавление новой книги{% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.title.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.author.id_for_label }}" class="form-label">{{ form.author.label }}</label>
+                                {{ form.author }}
+                                {% if form.author.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.author.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.new_author.id_for_label }}" class="form-label">{{ form.new_author.label }}</label>
+                                {{ form.new_author }}
+                                <div class="form-text">{{ form.new_author.help_text }}</div>
+                                {% if form.new_author.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.new_author.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
+                                {{ form.subject }}
+                                {% if form.subject.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.subject.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.new_subject.id_for_label }}" class="form-label">{{ form.new_subject.label }}</label>
+                                {{ form.new_subject }}
+                                <div class="form-text">{{ form.new_subject.help_text }}</div>
+                                {% if form.new_subject.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.new_subject.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.grade.id_for_label }}" class="form-label">{{ form.grade.label }}</label>
+                                {{ form.grade }}
+                                {% if form.grade.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.grade.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.book_file.id_for_label }}" class="form-label">{{ form.book_file.label }}</label>
+                                {{ form.book_file }}
+                                <div class="form-text">Поддерживаемые форматы: PDF, EPUB</div>
+                                {% if form.book_file.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.book_file.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if object and object.book_file %}
+                                    <p class="mt-2">Текущий файл: <a href="{{ object.book_file.url }}" target="_blank">{{ object.book_file.name }}</a></p>
+                                    <div class="mt-1">
+                                        <a href="{% url 'delete-book-file' object.id %}" class="btn btn-outline-danger btn-sm">Удалить файл</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.cover.id_for_label }}" class="form-label">{{ form.cover.label }}</label>
+                                {{ form.cover }}
+                                <div class="form-text">Поддерживаемые форматы: JPG, JPEG, PNG. Макс размер: 5 МБ.</div>
+                                {% if form.cover.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.cover.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if object and object.cover %}
+                                    <p class="mt-2">Текущая обложка:</p>
+                                    <img src="{{ object.cover.url }}" alt="Обложка" class="img-thumbnail" style="max-height: 100px;">
+                                    <div class="mt-1">
+                                        <a href="{% url 'delete-book-cover' object.id %}" class="btn btn-outline-danger btn-sm">Удалить обложку</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="{{ form.excerpt.id_for_label }}" class="form-label">{{ form.excerpt.label }}</label>
+                                {{ form.excerpt }}
+                                <div class="form-text">Формат: PDF</div>
+                                {% if form.excerpt.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.excerpt.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                {% if object and object.excerpt %}
+                                    <p class="mt-2">Текущий отрывок: <a href="{{ object.excerpt.url }}" target="_blank">{{ object.excerpt.name }}</a></p>
+                                    <div class="mt-1">
+                                        <a href="{% url 'delete-book-excerpt' object.id %}" class="btn btn-outline-danger btn-sm">Удалить отрывок</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% if object %}{% url 'book-detail' object.id %}{% else %}{% url 'book-list' %}{% endif %}" class="btn btn-outline-secondary">Отмена</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if object %}Сохранить изменения{% else %}Добавить книгу{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Добавляем классы Bootstrap к форме
+    document.addEventListener('DOMContentLoaded', function() {
+        const formControls = document.querySelectorAll('input, select, textarea');
+        formControls.forEach(element => {
+            if (!element.classList.contains('form-check-input')) {
+                element.classList.add('form-control');
+            }
+            
+            if (element.classList.contains('is-invalid')) {
+                element.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                    const feedback = this.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %} 

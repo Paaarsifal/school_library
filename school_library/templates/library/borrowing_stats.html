@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block title %}Статистика бронирований{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Статистика бронирований</h2>
+        <hr>
+    </div>
+</div>
+
+<!-- Статистика по типам пользователей -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Бронирования по типам пользователей</h5>
+            </div>
+            <div class="card-body">
+                {% if user_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Тип пользователя</th>
+                                    <th>Количество бронирований</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stat in user_stats %}
+                                    <tr>
+                                        <td>
+                                            {% if stat.user_type == 'student' %}Ученик
+                                            {% elif stat.user_type == 'teacher' %}Учитель
+                                            {% elif stat.user_type == 'librarian' %}Библиотекарь
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ stat.total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">Нет данных о бронированиях</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Самые популярные книги -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Популярные книги</h5>
+            </div>
+            <div class="card-body">
+                {% if popular_books %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Книга</th>
+                                    <th>Автор</th>
+                                    <th>Бронирований</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for book in popular_books %}
+                                    <tr>
+                                        <td>{{ book.book__title }}</td>
+                                        <td>{{ book.book__author__name }}</td>
+                                        <td>{{ book.total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">Нет данных о популярных книгах</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Статистика скачиваний -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Скачиваемые книги</h5>
+            </div>
+            <div class="card-body">
+                {% if book_downloads %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Книга</th>
+                                    <th>Автор</th>
+                                    <th>Загрузок</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for download in book_downloads %}
+                                    <tr>
+                                        <td>{{ download.book__title }}</td>
+                                        <td>{{ download.book__author__name }}</td>
+                                        <td>{{ download.total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'download-logs' %}?file_type=book" class="btn btn-sm btn-outline-primary">Подробный журнал скачиваний книг</a>
+                    </div>
+                {% else %}
+                    <p class="text-center">Нет данных о скачиваниях книг</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Скачиваемые отрывки</h5>
+            </div>
+            <div class="card-body">
+                {% if excerpt_downloads %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Книга</th>
+                                    <th>Автор</th>
+                                    <th>Загрузок</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for download in excerpt_downloads %}
+                                    <tr>
+                                        <td>{{ download.book__title }}</td>
+                                        <td>{{ download.book__author__name }}</td>
+                                        <td>{{ download.total }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'download-logs' %}?file_type=excerpt" class="btn btn-sm btn-outline-primary">Подробный журнал скачиваний отрывков</a>
+                    </div>
+                {% else %}
+                    <p class="text-center">Нет данных о скачиваниях отрывков</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Просроченные книги -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Просроченные книги</h5>
+            </div>
+            <div class="card-body">
+                {% if overdue_books %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Пользователь</th>
+                                    <th>Книга</th>
+                                    <th>Инвентарный номер</th>
+                                    <th>Срок возврата</th>
+                                    <th>Дней просрочено</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for overdue in overdue_books %}
+                                    <tr>
+                                        <td>{{ overdue.reservation.user.username }}</td>
+                                        <td>{{ overdue.reservation.book_copy.book.title }}</td>
+                                        <td>{{ overdue.reservation.book_copy.inventory_number }}</td>
+                                        <td>{{ overdue.reservation.due_date|date:"d.m.Y" }}</td>
+                                        <td>{{ overdue.days_overdue }}</td>
+                                        <td>
+                                            <form hx-post="{% url 'return-book' overdue.reservation.id %}" hx-swap="outerHTML">
+                                                <button type="submit" class="btn btn-sm btn-success">Отметить возврат</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <p class="mb-0">Нет просроченных книг.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
